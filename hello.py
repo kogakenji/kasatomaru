@@ -1,4 +1,5 @@
 print("Let's Go!")
+print("Hurry up!")
 print("Hello World!")
 
 def test():
