@@ -6,7 +6,7 @@ pipeline {
 				echo 'Checkout...'
 				sh 'env'
 				checkout scm
-				￿￿stash 'sources'
+				stash 'sources'
 			}
 		}
 		stage('Build') {
