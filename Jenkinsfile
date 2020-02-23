@@ -6,14 +6,14 @@ pipeline {
 				echo 'Checkout...'
 				sh 'env'
 				checkout scm
-				￿￿//stash 'sources'
+				￿￿stash 'sources'
 			}
 		}
 		stage('Build') {
 			steps {
 				echo 'Build...'
 
-				//unstash 'sources'
+				unstash 'sources'
 				sh 'python hello.py'
 				stash 'sources'
 				sh 'export BUILD_STATUS=success'
