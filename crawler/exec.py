@@ -52,7 +52,7 @@ def get_URL_save_file(url, page_number):
 
 
 if __name__ == "__main__":
-    URLS = generate_urls(3199, 49276)
+    URLS = generate_urls(4355, 49276)
     print(f"Total to Download: {len(URLS)}")
     with ThreadPoolExecutor(max_workers=5) as executor:
         # future = executor.submit(get_URL_save_file, (2))
