@@ -27,33 +27,45 @@ def create_db():
                       id integer PRIMARY KEY AUTOINCREMENT,
                       name text,
                       surname text,
-                      destination text,
                       province text,
                       ship text,
+                      destination text,
                       leave_date text,
+                      arrive_date text,
                       link_family text,
-                      id_register integer,
-                      arrive_date)""")
+                      id_family_register integer)""")
     conn.commit()
 
 
-def insert_person(name, surname, destination, province, ship, leave_date, link, id_register, arrive_date):
+def insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register):
     # Insert a row of data
     sql = """INSERT INTO person (name,
                               surname,
-                              destination,
                               province,
                               ship,
+                              destination,
                               leave_date,
+                              arrive_date,
                               link_family,
-                              id_register,
-                              arrive_date)
+                              id_family_register)
                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           """
 
-    cursor.execute(sql, (name, surname, destination, province, ship, leave_date, link, id_register, arrive_date))
+    cursor.execute(sql, (name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register))
     conn.commit()
+
+def families():
+    sql = """SELECT distinct(id_family_register), link_family
+             FROM person
+             group by id_family_register
+             order by id_family_register asc
+          """
+
+    people = cursor.execute(sql)
+    return list(people)
+
 
 if __name__ == "__main__":
     # create_db()
+    print(len(families()))
     # insert_person("Kenji", "Koga", "Brazil", "Hokkaido", "Kasatomaru", "10/10/1980", "localhost", 12342, "10/12/1980")
