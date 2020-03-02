@@ -61,6 +61,7 @@ def get_family_pages():
                 print(f"{url} generated an exception: {exc}")
             else:
                 page_number = url[url.rfind("=") + 1:]
+                page_number = url[url.find("=")+1:url.find("&")]
                 # write data to a file
                 with open(f"page_{page_number}.html", "wb") as f:
                     f.write(data)
