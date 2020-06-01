@@ -130,3 +130,10 @@ dmypy.json
 
 .vscode
 .idea
+
+.DS_Store
+
+families_files/
+jp_files/
+main_files/
+

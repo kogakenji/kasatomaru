@@ -1,5 +1,4 @@
-print("Let's Go Eugenio!")
-print("Hurry up!")
+print("Hurry up!!!")
 print("Hello World!")
 
 def test():
