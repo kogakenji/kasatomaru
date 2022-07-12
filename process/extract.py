@@ -8,6 +8,11 @@ import threading
 
 # Define the lock globally
 lock = threading.Lock()
+PORTUGUESE = "p"
+JAPANESE = "j"
+PORTUGUESE_PATH = "../files/pt"
+JAPANESE_PATH = "../files/jp"
+TOTAL_PAGES = 24566
 
 def files_list(start, end):
     """Generate url list with given start and end of indexes"""
@@ -16,83 +21,93 @@ def files_list(start, end):
         resultlist.append(f"page_{i}.html")
     return resultlist
 
-def extract_main_pages():
+def extract_main_pages(language):
     """Extracts content from main pages """
-    pages = files_list(1, 49278)
-    # There was a problematic file: 44663.html removed #&...
-    print(len(pages))
+    pages = files_list(1, TOTAL_PAGES)
+    print(f"total pages: {len(pages)}")
     for page in pages:
-        path = pathlib.Path.cwd().parent / "main_files" / page
-        print(path)
+        path = None
+        if language == PORTUGUESE:
+            path = pathlib.Path.cwd().parent / "files" / "pt"/ page
+        elif language = JAPANESE:
+            path = pathlib.Path.cwd().parent / "files" / "jp"/ page
+        
         with open(str(path), encoding="ISO-8859-1") as p:
-            soup = BeautifulSoup(p.read(), 'html.parser')
-            # soup = BeautifulSoup(p.read(), 'lxml')
+            # soup = BeautifulSoup(p.read(), 'html.parser')
+            soup = BeautifulSoup(p.read(), 'lxml')
 
-            # table = soup.find_all("table", bgcolor="#FFFFFF")
-            # print(table)
-
-            data = soup.find_all("tr", {'class': 'texto'})
-
-            for i, d in enumerate(data):
-                tds = data[i].find_all('td')
+            table = soup.find_all("div", class_='divrow')
+            data = table[0].find_all("div", class_='divcol')
+            for i, d in enumerate(table):
+                tds = table[i].find_all("div", class_="divcol")
 
                 ship = tds[0].a.contents[0].strip()
-                link_family = "http://www.museubunkyo.org.br/ashiato/web2/" + tds[1].a.get("href")
-                family_id_register = link_family[link_family.find("=") + 1:link_family.index("&")]
+                link_family = "http://imigrantes.ubik.com.br" + tds[1].a.get("href")
+                
+                family_id_register = link_family[link_family.find('=')+1:]
                 leave_date = tds[1].a.contents[0].strip()
-                leave_date = datetime.datetime.strptime(leave_date, '%m/%d/%Y').strftime('%d/%m/%y')
-                arrive_date = tds[1].a.contents[2].strip()
-                arrive_date = datetime.datetime.strptime(arrive_date, '%m/%d/%Y').strftime('%d/%m/%y')
-                province = tds[2].a.contents[0].strip()
-                destination = tds[3].a.contents[0].strip()
-                surname = tds[4].a.contents[0][0:4].strip()
-                name = tds[5].a.contents[0].strip()
-                print(
-                    f"Ship: {ship} - leave_date: {leave_date} - arrive_date: {arrive_date} - province: {province} - destination: {destination} - surname: {surname} - name: {name}")
-                # print(f"link_family: {link_family} - idRegistro: {id_register}")
-                db.insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link_family,
-                                 family_id_register)
-
-def extract_jp_pages():
-    """Extracts content from main pages """
-    pages = files_list(1, 49277)
-    # There was a problematic file: 44663.html removed #&...
-    print(len(pages))
-    for page in pages:
-        path = pathlib.Path.cwd().parent / "jp_files" / "jp" /page
-        print(path)
-        with open(str(path), encoding="ISO-8859-1") as p:
-            soup = BeautifulSoup(p.read(), 'html.parser')
-            # soup = BeautifulSoup(p.read(), 'lxml')
-
-            # table = soup.find_all("table", bgcolor="#FFFFFF")
-            # print(table)
-
-            data = soup.find_all("tr", {'class': 'texto'})
-
-            for i, d in enumerate(data):
-                tds = data[i].find_all('td')
-
-                ship = tds[0].a.contents[0].strip()
-                link_family = "http://www.museubunkyo.org.br/ashiato/web2/" + tds[1].a.get("href")
-                family_id_register = link_family[link_family.find("=") + 1:link_family.index("&")]
-                leave_date = tds[1].a.contents[0].strip()
-                leave_date = datetime.datetime.strptime(leave_date, '%m/%d/%Y').strftime('%d/%m/%y')
-                arrive_date = tds[1].a.contents[2].strip()
-                arrive_date = datetime.datetime.strptime(arrive_date, '%m/%d/%Y').strftime('%d/%m/%y')
-                province = tds[2].a.contents[0].strip()
-                destination = tds[3].a.contents[0].strip()
-                surname = tds[4].a.contents[0][0:4].strip()
-                name = tds[5].a.contents[0].strip()
+                leave_date = datetime.datetime.strptime(leave_date, '%d/%m/%Y').strftime('%d/%m/%y')
+                
+                arrive_date = tds[2].a.contents[0].strip()
+                arrive_date = datetime.datetime.strptime(arrive_date, '%d/%m/%Y').strftime('%d/%m/%y')
+                
+                province = tds[4].a.contents[0].strip()
+                
+                destination = tds[5].a.contents[0].strip()
+                
+                surname = tds[6].a.contents[0].strip()
+                
+                name = tds[7].a.contents[0].strip()
                 try:
                     print(
                         f"Ship: {ship} - leave_date: {leave_date} - arrive_date: {arrive_date} - province: {province} - destination: {destination} - surname: {surname} - name: {name}")
-                    # print(f"link_family: {link_family} - idRegistro: {id_register}")
+                    # print(f"link_family: {link_family} - idRegistro: {family_id_register}")
                     db.insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link_family,
-                                     family_id_register)
+                                    family_id_register)
                 except Exception as exp:
                     print(exp)
                     pass
+
+# def extract_jp_pages():
+#     """Extracts content from main pages """
+#     pages = files_list(1, 24566)
+#     # There was a problematic file: 44663.html removed #&...
+#     print(len(pages))
+#     for page in pages:
+#         path = pathlib.Path.cwd().parent / "files" / "jp" /page
+#         print(path)
+#         with open(str(path), encoding="ISO-8859-1") as p:
+#             soup = BeautifulSoup(p.read(), 'html.parser')
+#             # soup = BeautifulSoup(p.read(), 'lxml')
+
+#             # table = soup.find_all("table", bgcolor="#FFFFFF")
+#             # print(table)
+
+#             data = soup.find_all("tr", {'class': 'texto'})
+
+#             for i, d in enumerate(data):
+#                 tds = data[i].find_all('td')
+
+#                 ship = tds[0].a.contents[0].strip()
+#                 link_family = "http://www.museubunkyo.org.br/ashiato/web2/" + tds[1].a.get("href")
+#                 family_id_register = link_family[link_family.find("=") + 1:link_family.index("&")]
+#                 leave_date = tds[1].a.contents[0].strip()
+#                 leave_date = datetime.datetime.strptime(leave_date, '%m/%d/%Y').strftime('%d/%m/%y')
+#                 arrive_date = tds[1].a.contents[2].strip()
+#                 arrive_date = datetime.datetime.strptime(arrive_date, '%m/%d/%Y').strftime('%d/%m/%y')
+#                 province = tds[2].a.contents[0].strip()
+#                 destination = tds[3].a.contents[0].strip()
+#                 surname = tds[4].a.contents[0][0:4].strip()
+#                 name = tds[5].a.contents[0].strip()
+#                 try:
+#                     print(
+#                         f"Ship: {ship} - leave_date: {leave_date} - arrive_date: {arrive_date} - province: {province} - destination: {destination} - surname: {surname} - name: {name}")
+#                     # print(f"link_family: {link_family} - idRegistro: {id_register}")
+#                     db.insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link_family,
+#                                      family_id_register)
+#                 except Exception as exp:
+#                     print(exp)
+#                     pass
 
 def has_class_but_no_id(tag):
     tag.has_attr('class') and tag.attrs()
@@ -175,7 +190,7 @@ def extract_family_content():
 
 
 if __name__ == "__main__":
-    # extract_main_pages()
-     extract_family_content()
+    extract_main_pages()
+    #  extract_family_content()
     # extract_jp_pages()
 

@@ -25,41 +25,56 @@ def disconnect():
 conn = connect()
 cursor = conn.cursor()
 
+def create_db():
+    create_person()
+    create_family()
+    conn.commit()
+    disconnect()
+
 def create_person():
     # Create table
-    cursor.execute("""CREATE TABLE person(
-                      id integer PRIMARY KEY AUTOINCREMENT,
-                      name text,
-                      surname text,
-                      province text,
-                      ship text,
-                      destination text,
-                      leave_date text,
-                      arrive_date text,
-                      link_family text,
-                      id_family_register integer)""")
-    conn.commit()
+    try:
+        cursor.execute("""CREATE TABLE person(
+                        id integer PRIMARY KEY AUTOINCREMENT,
+                        name text,
+                        surname text,
+                        province text,
+                        ship text,
+                        destination text,
+                        leave_date text,
+                        arrive_date text,
+                        link_family text,
+                        id_family_register integer)""")
+    except Exception as exp:
+        print(f"Error: {exp}")
+
+            
+
 
 def create_family():
     # Create table
-    cursor.execute("""CREATE TABLE family(
-                      id integer PRIMARY KEY,
-                      FOREIGN KEY(id) REFERENCES person(id_family_register)  
-                      name text,
-                      surname text,
-                      province text,
-                      ship text,
-                      destination text,
-                      leave_date text,
-                      arrive_date text,
-                      link_family text,
-                      id_family_register integer)""")
+    try:
+        # cursor.execute("""DROP TABLE family""")
+        cursor.execute("""CREATE TABLE family(
+                        id integer PRIMARY KEY,
+                        name text,
+                        surname text,
+                        province text,
+                        ship text,
+                        destination text,
+                        leave_date text,
+                        arrive_date text,
+                        link_family text,
+                        person_id integer,
+                        FOREIGN KEY(person_id) REFERENCES person(id))""")
+    except Exception as exp:
+        print(f"Error: {exp}")
 
 
 def insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register):
     # Insert a row of data
-    sql = """INSERT INTO jp_person (japanese_name,
-                              japanese_surname,
+    sql = """INSERT INTO person (name,
+                              surname,
                               province,
                               ship,
                               destination,
@@ -127,6 +142,6 @@ def update_jp_family(name, surname, japanese_name, japanese_surname, ship, desti
     conn.commit()
 
 if __name__ == "__main__":
-    # create_db()
-    print(len(families()))
+    create_db()
+    # print(len(families()))
     # insert_person("Kenji", "Koga", "Brazil", "Hokkaido", "Kasatomaru", "10/10/1980", "localhost", 12342, "10/12/1980")
