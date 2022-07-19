@@ -27,14 +27,37 @@ cursor = conn.cursor()
 
 def create_db():
     create_person()
-    create_family()
+    create_person_jp()
     conn.commit()
     disconnect()
 
 def create_person():
     # Create table
     try:
+        # cursor.execute("""DROP TABLE person""")
         cursor.execute("""CREATE TABLE person(
+                        id integer PRIMARY KEY AUTOINCREMENT,
+                        name text,
+                        surname text,
+                        name_kanji text,
+                        surname_kanji text,
+                        province text,
+                        ship text,
+                        destination text,
+                        leave_date text,
+                        arrive_date text,
+                        link_family text,
+                        farm text,
+                        station text,
+                        id_family_register integer)""")
+    except Exception as exp:
+        print(f"Error: {exp}")
+
+def create_person_jp():
+    # Create table
+    try:
+        # cursor.execute("""DROP TABLE person_jp""")
+        cursor.execute("""CREATE TABLE person_jp(
                         id integer PRIMARY KEY AUTOINCREMENT,
                         name text,
                         surname text,
@@ -46,29 +69,7 @@ def create_person():
                         link_family text,
                         id_family_register integer)""")
     except Exception as exp:
-        print(f"Error: {exp}")
-
-            
-
-
-def create_family():
-    # Create table
-    try:
-        # cursor.execute("""DROP TABLE family""")
-        cursor.execute("""CREATE TABLE family(
-                        id integer PRIMARY KEY,
-                        name text,
-                        surname text,
-                        province text,
-                        ship text,
-                        destination text,
-                        leave_date text,
-                        arrive_date text,
-                        link_family text,
-                        person_id integer,
-                        FOREIGN KEY(person_id) REFERENCES person(id))""")
-    except Exception as exp:
-        print(f"Error: {exp}")
+        print(f"Error: {exp}")   
 
 
 def insert_person(name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register):
@@ -88,60 +89,42 @@ def insert_person(name, surname, province, ship, destination, leave_date, arrive
     cursor.execute(sql, (name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register))
     conn.commit()
 
-def families():
-    sql = """SELECT distinct(id_family_register) as id_family, link_family
-             FROM person
-             group by id_family_register
-             order by id_family_register asc
+
+def insert_person_jp(name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register):
+    # Insert a row of data
+    sql = """INSERT INTO person_jp (name,
+                              surname,
+                              province,
+                              ship,
+                              destination,
+                              leave_date,
+                              arrive_date,
+                              link_family,
+                              id_family_register)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           """
 
-    people = cursor.execute(sql)
-    return list(people)
+    cursor.execute(sql, (name, surname, province, ship, destination, leave_date, arrive_date, link, id_family_register))
+    conn.commit()
 
-def person_info():
-    sql = """SELECT distinct(id_family_register)
-                 FROM jp_person
-                 WHERE farm is null and id_family_register > 10000
-                 order by id_family_register
+
+def insert_japanese_name_into_person():
+    sql = """SELECT id, name, surname
+                 FROM person_jp
               """
-    people = cursor.execute(sql)
-    return list(people)
-
-def update_family(name, surname, japanese_name, japanese_surname, ship, destination, leave_date, arrival_date, farm, station):
-    # Insert a row of data
-    sql = """UPDATE person 
-             SET farm = ?,
-                 station = ?,
-                 japanese_name = ?,
-                 japanese_surname =?
-             WHERE name = ?
-             AND surname = ?
-             AND ship = ?
-             AND destination = ?
-             AND leave_date = ?
-             AND arrive_date = ?
+    kanji_names = cursor.execute(sql)
+    list_names = list(kanji_names)
+    for id, name_kanji, surname_kanji in list_names:
+        print(f"id: {id}, name_kanji: {name_kanji}, surname_kanji: {surname_kanji}")
+        sql2 = """UPDATE person SET name_kanji = ?,
+                                surname_kanji = ?
+                                WHERE id = ?
             """
-    cursor.execute(sql, (farm, station, japanese_name, japanese_surname, name, surname, ship, destination, leave_date, arrival_date))
-    conn.commit()
 
-def update_jp_family(name, surname, japanese_name, japanese_surname, ship, destination, leave_date, arrival_date, farm, station):
-    # Insert a row of data
-    sql = """UPDATE jp_person 
-             SET farm = ?,
-                 station = ?,
-                 name = ?,
-                 surname = ?
-             WHERE japanese_name = ?
-             AND japanese_surname = ?
-             AND ship = ?
-             AND destination = ?
-             AND leave_date = ?
-             AND arrive_date = ?
-            """
-    cursor.execute(sql, (farm, station, name, surname, japanese_name, japanese_surname, ship, destination, leave_date, arrival_date))
-    conn.commit()
+        cursor.execute(sql2, (name_kanji, surname_kanji, id))
+        conn.commit()
+
 
 if __name__ == "__main__":
-    create_db()
-    # print(len(families()))
-    # insert_person("Kenji", "Koga", "Brazil", "Hokkaido", "Kasatomaru", "10/10/1980", "localhost", 12342, "10/12/1980")
+    # create_db()
+    insert_japanese_name_into_person()

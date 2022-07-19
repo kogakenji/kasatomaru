@@ -8,8 +8,10 @@ START = 1
 END = 24567
 PORTUGUESE = "p"
 JAPANESE = "j"
+FAMILY = "f"
 PORTUGUESE_PATH = "../files/pt"
 JAPANESE_PATH = "../files/jp"
+FAMILY_PATH = "../files/family"
 
 def get_downloaded(language, language_path):
     path_exists = False
@@ -21,6 +23,11 @@ def get_downloaded(language, language_path):
         path_exists = os.path.exists(JAPANESE_PATH)
         if not path_exists:
             os.makedirs(JAPANESE_PATH)
+    elif language == FAMILY:
+        path_exists = os.path.exists(FAMILY_PATH)
+        if not path_exists:
+            os.makedirs(FAMILY_PATH)
+
     from os import listdir
     from os.path import isfile, join
     onlynum = [f.strip('.html').lstrip('page_') for f in listdir(language_path) if isfile(join(language_path, f))]
@@ -80,32 +87,41 @@ def write_file(language, page, data):
     elif language == JAPANESE:
         with open(f"{JAPANESE_PATH}/page_{page}.html", "wb") as f:
             f.write(data)
+    elif language == FAMILY:
+        with open(f"{FAMILY_PATH}/page_{page}.html", "wb") as f:
+            f.write(data)
 
 
 def get_family_pages():
     """Get urls in database, downloads the pages of families"""
-    URLS = db.families()
+    downloaded = get_downloaded(FAMILY, FAMILY_PATH)
+    URLS = []
+    for page, url in db.families():
+        if str(page) not in downloaded:
+            URLS.append({"page": page,
+                        "url": url})
+    
     print(f"Total to Download: {len(URLS)}")
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         # Start the load operations and mark each future with its URL
-        future_to_url = {executor.submit(geturl, url): url for _, url in URLS}
+        future_to_url = {executor.submit(geturl, page): page for page in URLS}
         for future in concurrent.futures.as_completed(future_to_url):
             url = future_to_url[future]
             try:
                 print(f"Downloading {url}")
-                data = future.result()
+                data, page = future.result()
             except Exception as exc:
                 print(f"{url} generated an exception: {exc}")
             else:
-                page_number = url[url.find("=")+1:url.find("&")]
                 # write data to a file
-                with open(f"page_{page_number}.html", "wb") as f:
-                    f.write(data)
-                print(f"{url} downloaded.")
+                write_file(FAMILY, page, data)
     print("All tasks completed!")
 
 if __name__ == "__main__":
     # get the main pages of people
+    # 1) get the main pages of portuguese language
     # get_main_pages(PORTUGUESE)
-    get_main_pages(JAPANESE)
-    # get_family_pages()
+    # 2) get the main pages of japanese language
+    # get_main_pages(JAPANESE)
+    # 3) get the family pages
+    get_family_pages()
