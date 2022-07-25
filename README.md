@@ -66,3 +66,18 @@ And execute:
 ```
 PYTHONPATH=. python db.py
 ```
+
+################################
+
+# To run the webserver
+
+- uvicorn app.main:app --reload
+
+###############################
+
+# TODO
+
+- Query of families based on date
+- Query based on ship
+- Query based on origin
+- Query based on destination

@@ -125,6 +125,19 @@ def insert_japanese_name_into_person():
         conn.commit()
 
 
+# Queries used by API
+def get_family_by_surname(surname):
+    sql = """SELECT name, surname, name_kanji, surname_kanji, province, ship, destination, leave_date, arrive_date, farm, station
+            FROM person
+            WHERE surname = ?
+          """
+    people = cursor.execute(sql, (surname.upper(),))
+    r = [dict((cursor.description[i][0], value) \
+               for i, value in enumerate(row)) for row in cursor.fetchall()]
+    return r
+
+
 if __name__ == "__main__":
     # create_db()
-    insert_japanese_name_into_person()
+    # insert_japanese_name_into_person()
+    get_family_by_surname("KOGA")
