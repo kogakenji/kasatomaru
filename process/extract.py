@@ -85,7 +85,6 @@ def get_family_content(id_family_register):
 
     with open(str(path), encoding="UTF-8") as p:
         soup = BeautifulSoup(p.read(), "lxml")
-        # print("=================fazenda================")
         td = soup.find_all("div", class_='col-xs-4')
         td_farm = td[4].find_all("label", class_='textSubTitle')
         farm = td_farm[0].get_text()
@@ -97,7 +96,6 @@ def get_family_content(id_family_register):
 
         lock.acquire(True)
         try:
-            # print(f"person: {p}")
             db.update_person_with_family_info(farm, station, id_family_register)
         except Exception as err:
             print(err)

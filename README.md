@@ -70,9 +70,23 @@ PYTHONPATH=. python db.py
 ################################
 
 # To run the webserver
-
-- uvicorn app.main:app --reload
-
+- create virtual environment:
+```
+python -m venv .venv
+```
+- activate virtual environment:
+```
+source .venv/bin/activate
+```
+- install packages
+```
+pip install -r requirements.txt
+```
+- run fast api webserver:
+```
+uvicorn app.main:app --reload
+```
+- access web on a web browser http://127.0.0.1:8000. You should see Hello: "World"
 ###############################
 
 # TODO
