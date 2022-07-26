@@ -89,6 +89,19 @@ uvicorn app.main:app --reload
 - access web on a web browser http://127.0.0.1:8000. You should see Hello: "World"
 ###############################
 
+# Using the Docker Container
+Create image:
+```
+docker buld -t kasatomaru_image .
+```
+Run image
+```
+docker run -d --name kasatomaru -p 80:80  kasatomaru_image
+```
+- access web on a web browser http://localhost:80/. You should see Hello: "World"
+- access web on a web browser http://localhost:80/family/{surname}. You should see list of people from the same family.
+
+
 # TODO
 
 - Query of families based on date
